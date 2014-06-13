@@ -15,8 +15,8 @@ h2{
 #main{
 	margin: 0 auto;
 	background: #fff;
-	padding: 20px 0px 20px 20px;
-	width: 960px;
+	padding: 20px 20px 50px 20px;
+	width: 960px;	
 }
 
 a{
@@ -31,4 +31,17 @@ a:hover{
 .image_p{
 	text-align: center;
 	margin: 20px 0;
+}
+
+.code_p{
+	text-align: center;
+	margin: 20px 0;
+}
+
+ul{
+	padding: 10px;
+}
+
+li{
+	margin: 10px;	
 }

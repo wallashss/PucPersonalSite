@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+		<title>Imagens Sísmicas</title>
+		<link rel="stylesheet" href="../../../css/style.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>
+			hljs.initHighlightingOnLoad();
+		</script>
+	</head>
+
+	<body>
+
+		<div id="main">
+			<p>
+				Wallas H. S. Santos
+			</p>
+			<h1>Imagens Sísmicas</h1>
+
+			<h2>Introdução</h2>
+			
+			<p>Para análise da geologia de uma dada região, o método sísmico é uma abordagem utilizada para gerar modelos e
+				 processamento de dados.</p>
+			
+			<p>Esta página tem como objetivo apresentar uma abordagem de realce de horizontes e falhas sísmicas em imagens de reflexão
+			de ondas.</p>
+			
+			
+			
+			 
+			<p class="image_p">
+				<a href="images/original.png" target="_blank"> <img src="images/original.png" /></a>
+				<br />
+				Imagem sísmica exemplo.
+			</p>
+
+			
+
+			<h2>Quality Threshold</h2>
+
+			<p>
+				O algoritmo de clusterização Quality Threshold (QT) foi aplicado ao agrupamento de dados alternativos,
+				proposto inicialmente para o agrupamento de genes do cromossomo humano (XU, 2005; JIANG, 2006). 
+			</p>
+			<p>
+
+				<ul>
+					<li>
+						1. Inicialmente, é necessário escolher um limiar de qualidade para formação do cluster. Esse limiar é um valor informado pelo usuário que irá determinar à abrangência de cada cluster. Com isso o número total de clusters é inversamente proporcional ao valor do diâmetro, ou seja, quanto menor o diâmetro mais clusters resultantes teremos no processamento;
+					</li>
+					<li>
+						2. Para cada ponto, será calculada a distância euclidiana  entre ele e os demais pontos, dessa forma o algoritmo irá executar o processo de geração  dos clusters candidatos. A formação dos candidatos é delimitada pelo limiar estabelecido anteriormente, assim se a distância for menor ou igual ao limiar aqueles dois pontos em questão compõem o mesmo candidato, caso contrário, o valor da distância seja maior que o limiar esse ponto não constituirá esse cluster. Deste modo o ponto fará parte de outro cluster cuja a distância atenda ao critério de formação, menor ou igual ao limiar. Este procedimento é realizado para os pontos restantes gerando todos os candidatos a clusters.
+					</li>
+					<li>
+						3. Nessa etapa será calculado entre os clusters candidatos o que possuir o maior número de pontos a ele associado, dessa forma esse cluster candidato passará a ser um verdadeiro cluster. Os pontos que compõem o melhor candidato são removidos da amostra original, logo, ficará a execução mais rápida, ou seja, com a remoção dos pontos da amostra original a quantidade a ser processada na próxima iteração  será menor.
+					</li>
+					<li>
+						4. Repetir o novamente os passos 2 e 3 até que os demais pontos sejam alocados nos seus respectivos clusters.
+					</li>
+				</ul>
+
+			</p>
+			
+			<h2> Metodologia</h2>
+			
+			<p>
+				O (Qt) foi utilizado na metodologia para agrupar intensidades de pixels na imagens. Essa intensidades representam os picos e os vales de ondas refletidas pelo estímulo sonoro vindo da superfície nas camadas dos solos.
+				
+			</p>
+			<p>
+				O Qt tem como parâmetro principal a distância entre os grupos. Na metodologia foi adotado por não se saber quantos grupos seria ideal para segmentar os horizontes. No problema em questão, quanto maior a distância, mais horizontes são agrupados em um mesmo grupo, do contrário as intensidades das ondas.
+			</p>
+
+			<h2>Resultados</h2>
+
+			<p class="image_p">
+				<a href="images/image_0.png" target="_blank"><img src="images/image_0.png" width="400" /></a>
+				<a href="images/image_1.png" target="_blank"><img src="images/image_1.png" width="400" /></a>
+				<a href="images/image_2.png" target="_blank"><img src="images/image_2.png" width="400" /></a>
+				<a href="images/image_3.png" target="_blank"><img src="images/image_3.png" width="400"/></a>
+				<a href="images/image_4.png" target="_blank"><img src="images/image_4.png" width="400"/></a>
+				<a href="images/image_5.png" target="_blank"><img src="images/image_5.png" width="400" /></a>
+				<br />
+
+				Imagens binárias com clusteres resultantes da aplicação do Qt. Os pixels com cor branca representa qu
+			</p>
+			<p class="image_p">
+				<a href="images/clusters_final.png" target="_blank"><img src="images/clusters_final.png" target="_blank" /></a>
+			</p>
+
+			<p class="image_p">
+				<img src="images/cluster_detail.png" href="images/cluster_detail.png" target="_blank" />
+				<img src="images/original_detail.png" href="images/original_detail.png" target="_blank" />
+			</p>
+
+			<h2>Referências</h2>
+			<p>
+				JIANG, D.; TANG, C.; ZHANG, A. Cluster analysis for gene expression data: A  survey. IEEE Transactions on Knowledge and Data Engineering, 16 (11) 1370-1386, New York, 2006.
+			</p>
+			<p>
+				XU R.; WUNSCH, D. Survey of clustering algorithms. IEEE  Transactions on Neural Networks, vol. 16, n. 3, p. 645 - 678,  2005.
+			</p>
+
+		</div>
+	</body>
+</html>

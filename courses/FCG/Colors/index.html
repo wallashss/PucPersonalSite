@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+		<title>Disciplina de FCG</title>
+		<link rel="stylesheet" href="../../../css/style.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>
+			hljs.initHighlightingOnLoad();
+		</script>
+	</head>
+
+	<body>
+
+		<div id="main">
+			<p>
+				Wallas H. S. Santos
+			</p>
+			<h1>Gamut de Cores</h1>
+
+			<h2>Introdução</h2>
+			<!-- O olho humano possui três tipos de cones sensores que se estimulam de acordo com o comprimento
+			de onda da luz que entra em seu interior.-->
+			<p>
+
+				O Gamut de cores é uma representação gráfica de um espaço de cor. Dentre os espaços e cores podemos destacar o
+				CIE XYZ e CIE RGB. O espaço de cor CIE RGB descreve a cor como uma decomposição de três cores primárias puras
+				(vermelho, verde e azul). O CIE XYZ é um espaço de cor resultado de uma transformação do CIE RGB de tal forma que as curvas
+				de componente entre o tri-estimulo para um dado comprimento de onda tivesse somente valores positivos no espectro
+				visível (~380 - 740 nm).
+			</p>
+			<p>
+				Esta página tem como objetivo apresentar um software que plote os Gamut de Cores em um gráfico 3D
+				para as bases CIE XYZ e CIE RGB.
+			</p>
+
+
+			<h2> Ferramentas </h2>
+
+			<p>
+				Software desenvolvido em C++ utilizando o framework QT para criar contexto OpenGL e tratamento de eventos.
+			</p>
+
+			<h2>Fundamentação</h2>
+
+			<p>
+				O problema consiste em criar dois gráficos com Gamut nas bases CIE XYZ e CIE RGB através de espectros de reflexão.
+				O espectro de reflexão deve ser gerado a partir de cores ótimas pelo método apresentado por Perales et al
+				(vide <a href="#Referências">referências</a>).
+			</p>
+
+			<p>
+				Segundo Perales et al. existem dois tipos de espectro de reflexão para cores ótimas. Os tipos são vale e montanha,
+				os quais são ondas quadradas com amplitude 1 (vide Figura 1).
+			</p>
+
+			<p class="image_p">
+				<img src="images/optical_colors.png" />
+				<br />
+				Figura 1. Dois tipos de espectro de reflexão. A esquerda tipo montanha e a direita tipo vale.
+			</p>
+
+			<p>
+				A Figura 2 Apresenta os dois algoritmos para gerar o espectro de reflexão dos dois tipos.  O algoritmo encontra conjunto de pares 
+				contidos no espectro visível que vão definir o espectro de reflexão para um dado iluminante. No caso deste trabalho
+				o iluminante utilizado será o D65.
+			</p>
+
+			<p class="image_p">
+				<img src="images/algorithm.png" />
+				<br />
+				Figura 2. A esquerda o algoritmo para gerar espectro de reflexão de cores ótimas do tipo montanha e a direita do tipo vale.
+			</p>
+			<p>
+				Uma vez encontrado os espectros de reflexão para as cores ótimas. É possível calcular o XYZ de cada um pelas equações
+				da Figura 3. A distribuição S representa o espectro de reflexão, I o iluminante e x,y e z funções CIE para um 
+				observador padrão.    
+
+			</p>
+			<p class="image_p">
+				<img src="images/Eqn_Spect_XYZ_3.gif" />
+				<br />
+				Figura 3. Cálculo de XYZ para espectro de reflexão.
+			</p>
+			
+			<p >
+				
+				*<span style="size: 9px;">No encoding desta página houve dificuldades em representar os símbolos corretamente. Os símbolos dass funções x,y e z devem
+					conter a "barra" em cima. Além de representar em função de "lambda".</span> 
+			</p>
+			<h2>Desenvolvimento</h2>
+			<p>
+				No início do software deve-se gerar todos os XYZ do Gamut baseado na fundamentação dada. O próximo passo é plotar estes ponto em um gráfico 3D.
+				Para este trabalho foi adotado o OpenGL utilizando shaders. As coordenadas XYZ são armazenados em um buffer de vértices
+				seguindo a api do OpenGL.
+				
+			</p>
+
+			<p>
+				Através das coordenadas de CIE XYZ é possível converter para outras bases. Dentre elas temos o CIE RGB, como um
+				segundo passo do trabalho. A conversão de base pode ser feita através de uma multiplicação por matrizes como
+				apresentado na Figura 4.
+
+			</p>
+			<p class="image_p">
+				<img src="images/cie_xyz_to_rgb.png" />
+				<br />
+				Figura 4. Mudança de base de XYZ para RGB.
+			</p>
+
+			<p>
+				No intuito de otimizar renderização dos Gamuts, foi desenvolvido dois shaders específicos para esta aplicação.
+				No programa de vértice a coordenada CIE XYZ é multiplicada pela matriz de
+				conversão de coordenadas local para câmera. Se for necessário converter de CIE XYZ para CIE RGB, basta multiplicar
+				a matriz MVP pela matriz de conversão apresentada anteriormente. Além do cálculo desse cálculo para atribuir a
+				posição na viewport, a coordenada é enviada também para o programa de fragmentos.
+
+				<!--No shader de vértices além do cálculo da posição do mesmo no sistema de câmera, é
+				enviado para o shader de fragmento também. -->
+				<!-- 				Os pontos que geram os Gamut são computados no início do programa e armazenados em um buffer de vértices para serem
+				enviados a placa gráfica.  -->
+			</p>
+
+			<p class="code_p">
+				<pre><code class="glsl">
+// vertexShader.vsh
+attribute highp vec3 vertexPosition;
+uniform highp mat4 MVP; // Multiplicado pela matriz de conversão de CIE XYZ para CIE RGB
+varying highp vec3 colorPosition;
+
+void main(void)
+{
+    colorPosition = vertexPosition;
+    gl_Position = MVP * vec4(vertexPosition,1);
+}
+	
+			</code></pre>
+			<br />				
+			
+
+			</p>
+
+			<p>
+				Dentro do programa de fragmentos é computado a cor desse ponto. A função corCIEXYZtosRGB é utilizada para converter
+				a coordenada CIE XYZ para uma cor que seja possível visualizar no mesmo espaço de cor do monitor do computador (sRGB).
+				Esta função recebe como
+				parâmetro a coordenada que foi passado pelo shader de vértice anteriormente. A vantagem de realizar esse cálculo
+				no shader é de reduzir a quantidade de informações que são passadas para GPU. Caso contrário seria necessário
+				realizar o cálculo da cor em pré processamento e armazenar em um buffer de cor, resultando mais 3 floats para cada
+				ponto do Gamut. Então, o volume de dados seria
+				duplicado podendo sobrecarregar o sistema ou reduzir a quantidade de pontos para construir a superfície do Gamut.
+
+				Vale destacar que é possível que nessa conversão gere valores fora da faixa de valores do rgb (0.0 a 1.0). Nesse
+				trabalho esse erro foi ignorado e o valor gerado foi enviado para ser truncado pela placa gráfica.
+				<!--Porém nem todos osvalores podem ser convertidas na faixa de valores rgb. Para esse trabalho os valores foram passados para a placa
+				mesmo fora deixando o truncamento ser realizado pela própria GPU. -->
+
+			</p>
+			<p class="code_p">
+				<pre><code class="glsl">
+// fragmentShader.fsh
+ 			
+varying highp vec3 colorPosition;
+
+float gamma_sRGB(float x){
+    float ft;
+    float t = (x>0.0)?x:-x;
+
+    if (t>0.0031308)
+    {
+        ft = 1.055*pow(t,1.0/2.4)-0.055;
+    }
+    else
+    {
+        ft = 12.92*t;
+    }
+
+    return (x>0.0)?ft:-ft;
+}
+
+vec4 corCIEXYZtosRGB(vec3 XYZ)
+{
+    vec3 color;
+
+    color.r = 3.2404542*XYZ.x - 1.5371385*XYZ.y - 0.4985314*XYZ.z;
+    color.g =-0.9692660*XYZ.x + 1.8760108*XYZ.y + 0.0415560*XYZ.z;
+    color.b = 0.0556434*XYZ.x - 0.2040259*XYZ.y + 1.0572252*XYZ.z;
+
+    color.r = gamma_sRGB(color.r);
+    color.g = gamma_sRGB(color.g);
+    color.b = gamma_sRGB(color.b);
+
+    return vec4(color,1);
+}
+
+void main(void)
+{
+    gl_FragColor = corCIEXYZtosRGB(colorPosition);
+}
+
+			</code></pre>			
+
+			</p>
+
+			<h2>Resultados</h2>
+			<p>
+				Na Seção <a href="#Recursos">Recursos</a> tem códigos fonte e um binário para windows disponível para
+				verificar o desenvolvimento e resultados do software. No software, a mudança de modo CIE XYZ e CIE RGB podem
+				ser feitas teclando 1 ou 2 respectivamente. A seguir imagens do software resultante.
+			</p>
+
+			<p class="image_p">
+				<img src="images/ciexyz_1.png" />
+			</p>
+
+			<p class="image_p">
+				<img src="images/ciexyz_2.png" />
+			</p>
+
+			<p class="image_p">
+				Gamut de cores CIE XYZ com D65
+			</p>
+
+			<p class="image_p">
+				<img src="images/ciergb_1.png" />
+			</p>
+
+			<p class="image_p">
+				<img src="images/ciergb_2.png" />
+			</p>
+
+			<p class="image_p">
+				Gamut de cores CIE RGB com D65
+			</p>
+
+			<h2 id="Recursos">Recursos</h2>
+			<p>
+				Código fonte disponível no Github e em zip.
+			</p>
+			<p>
+				<a href="https://github.com/wallashss/ColorGamut.git">https://github.com/wallashss/ColorGamut.git</a>
+			</p>
+			
+			<p>
+				<a href="resources/src.zip" target="_blank">src.zip</a>
+			</p>
+			
+			<p>
+				Binário para Windows 32 bits.
+			</p>
+			
+			<p>
+				<a href="resources/Gamut.zip" target="_blank">Gamut.zip</a>
+			</p>
+
+			<h2 id="Referências">Referências</h2>
+
+			<p>
+				<a href="http://www.brucelindbloom.com/">http://www.brucelindbloom.com/</a>
+			</p>
+
+			<p>
+				Perales Romero, Esther, et al. "A new algorithm for calculating the MacAdam limits for any luminance factor, hue angle and illuminant." (2005). <a href="http://193.145.233.67/dspace/bitstream/10045/955/1/aic_1.pdf">[pdf]</a>
+			</p>
+
+			<p>
+				QT Framework. <a href="http://qt-project.org/">http://qt-project.org/</a>
+			</p>
+			
+
+		</div>
+	</body>
+</html>
