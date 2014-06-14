@@ -4,7 +4,7 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 		<title>Imagens Sísmicas</title>
-		<link rel="stylesheet" href="../../../css/style.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
+		<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
 		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
 		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
 		<script>
@@ -19,22 +19,36 @@
 				Wallas H. S. Santos
 			</p>
 			<h1>Imagens Sísmicas</h1>
+			
+			<p>Esta página tem como objetivo apresentar uma abordagem de realce de horizontes e falhas sísmicas em imagens de reflexão
+			de ondas.
+			</p> 
 
 			<h2>Introdução</h2>
 			
 			<p>Para análise da geologia de uma dada região, o método sísmico é uma abordagem utilizada para gerar modelos e
-				 processamento de dados relaciondos. </p>
-
-			<p>Nesse método, ondas elásticas são geradas na superfície e vão sendo propagadas até camadas mais inferiores. 
-				Essas ondas são refletidas de acordo com a composição o material e retornando a superfície para serem
-				capturadas por equipamentos chamados geofones (terrestre) ou hidrofones (marítmos). Esses sinais então
-				são transformado em imagem, no qual pode-se realizar processamento para análise.</p>
-			<p>Esta página tem como objetivo apresentar uma abordagem de realce de horizontes e falhas sísmicas em imagens de reflexão
-			de ondas.</p>
+				 processamento de dados relacionados. Nesse método, ondas elásticas são geradas na superfície e 
+				 vão sendo propagadas até camadas mais inferiores. 
+				Essas ondas são refletidas de acordo com a composição o material e ao retornar a superfície são
+				capturadas por equipamentos chamados geofones (terrestre) ou hidrofones (marítmos). A partir da aquisição, as ondas
+				 são transformado em sinal, no qual pode-se realizar processamento e encontrar características da geologia do local
+				como horizontes e/ou falhas sísmicas.</p>
+				
+			<p>
+				As ondas captadas na aquisição são representadas em um linha contendo as amplitudes sísmicas ao longo do tempo 
+				chamada de traço sísmico. Na Figura abaixo é ilustrada os sinais de amplitudes sísmico em 1D (função), 2D (imagem) e 3D (volume).
+			</p>
+			<p class="image_p">
+				<img src="images/sample.png" />
+				<br />
+				Fonte SILVA, P. M. C, 2004.
+			</p>
 			
+			<p>A imagem abaixo será o exemplo utilizado para estudo. As intensidades de pixels estão quantizados para
+			uma imagem 8 bits para ser representada propriamente no monitor. Os dados originais estão em 16 bits que permite
+			uma escala mais apropriada para representar as amplitudes do traço sísmico. Nessa imagem os horizontes são linhas
+			horizontais com intensidades e pixels semelhantes. A falha sísmica é a descontinuidade do horizonte.</p>
 			
-			
-			 
 			<p class="image_p">
 				<a href="images/original.png" target="_blank"> <img src="images/original.png" /></a>
 				<br />
@@ -42,12 +56,12 @@
 			</p>
 
 			
-
 			<h2>Quality Threshold</h2>
-
+			
 			<p>
 				O algoritmo de clusterização Quality Threshold (QT) foi aplicado ao agrupamento de dados alternativos,
-				proposto inicialmente para o agrupamento de genes do cromossomo humano (XU, 2005; JIANG, 2006). 
+				proposto inicialmente para o agrupamento de genes do cromossomo humano (XU, 2005; JIANG, 2006). O algoritmo
+				segue os passos: 
 			</p>
 			<p>
 
@@ -59,26 +73,57 @@
 						2. Para cada ponto, será calculada a distância euclidiana entre este e os demais pontos, dessa forma o algoritmo irá executar o processo de geração dos clusters candidatos. A formação dos candidatos é delimitada pelo limiar estabelecido anteriormente, assim se a distância for menor ou igual ao limiar aqueles dois pontos em questão compõem o mesmo candidato, caso contrário, o valor da distância seja maior que o limiar esse ponto não constituirá esse cluster. Deste modo o ponto fará parte de outro cluster cuja a distância atenda ao critério de formação, menor ou igual ao limiar. Este procedimento é realizado para os pontos restantes gerando todos os candidatos a clusters.
 					</li>
 					<li>
-						3. Nessa etapa será calculado entre os clusters candidatos o que possuir o maior número de pontos a ele associado, dessa forma esse cluster candidato passará a ser um verdadeiro cluster. Os pontos que compõem o melhor candidato são removidos da amostra original, logo, ficará a execução mais rápida, ou seja, com a remoção dos pontos da amostra original a quantidade a ser processada na próxima iteração  será menor.
+						3. Nessa etapa será calculado entre os clusters candidatos que possuírem o maior número de pontos a ele associado, dessa forma esse cluster candidato passará a ser um verdadeiro cluster. Os pontos que compõem o melhor candidato são removidos da amostra original.
 					</li>
 					<li>
 						4. Repetir o novamente os passos 2 e 3 até que os demais pontos sejam alocados nos seus respectivos clusters.
 					</li>
 				</ul>
-
+			</p>
+			
+			<p>
+				O QT tem como características a "qualidade" (quality), ou seja, indivíduos somente farão parte de um grupo se
+				estiverem dentro de um limiar (threshold). Esse limiar é o parâmetro do algoritmo, e vai influenciar na quantidade de grupos resultantes.
+				Quanto maior um limiar, maior será a abrangência dos grupos, resultando em menor número de grupos. Do contrário, o algoritmo
+				vai gerando grupos podendo fazer o resultado ficar super segmentado.
+				   
 			</p>
 			
 			<h2> Metodologia</h2>
 			
 			<p>
-				O (Qt) foi utilizado na metodologia para agrupar intensidades de pixels na imagens. Essa intensidades representam os picos e os vales de ondas refletidas pelo estímulo sonoro vindo da superfície nas camadas dos solos.
+				Inicialmente, assim como várias metodologia de processamento de imagens/sinais é desejado remoção de ruídos
+				e artefatos contidos nos dados. Para o tal, será aplicado um filtro de suavização na coluna da imagem que é 
+				referente a um traço sísmico. O filtro realiza uma média em cada pixel tomando os dois vizinhos acima e abaixo.
 				
 			</p>
 			<p>
-				O Qt tem como parâmetro principal a distância entre os grupos. Na metodologia foi adotado por não se saber quantos grupos seria ideal para segmentar os horizontes. No problema em questão, quanto maior a distância, mais horizontes são agrupados em um mesmo grupo, do contrário as intensidades das ondas.
+				A Figura abaixo mostra um traço sísmico original a esquerdo e o mesmo suavizado a direita. O filtro da média
+				reduziu a amplitude dos picos e vales muito elevados.
+			</p>
+			<p class="image_p">
+				<a href="images/image_1.png" target="_blank"><img src="images/col_original.png" width="400" /></a>
+				<a href="images/image_0.png" target="_blank"><img src="images/col_smooth.png" width="400" /></a>
+			</p>
+			<p>
+				Seguindo o método, o QT, apresentado na sessão anterior, foi utilizado na metodologia para agrupar intensidades de pixels na imagem.
+				 Essas intensidades mensuram a amplitude do sinal pelo traço sísmico.
+				O QT tem como parâmetro principal a distância entre os grupos, e resulta em n grupos que satisfaçam esse limiar.
+			   Na metodologia foi adotado por não se saber quantos grupos seria ideal para segmentar os horizontes. No problema em questão,
+			    buscou-se experimentalmente encontrar um limiar que não agrupasse muitos tipos horizontes em um mesmo cluster, e 
+			    também que não fizesse que um horizonte não fosse contido em vários grupos.
 			</p>
 
 			<h2>Resultados</h2>
+			
+			<p>
+				As imagens abaixo mostram 6 clusteres isolados em imagens individuais. Os pixels com intensidade branca indicam a
+				presença no cluster. Essa saída é resultado do QT quando deseja-se que a distância entre pixels seja 700. De maneira
+				experimental apresentou os resultados mais interessantes para a metodologia na imagem exemplo utilizada.
+				 ruídos, logo é necessário realizar pós processamento para removê-los ou adicionar a algum grupo próximo.   
+				 A quantidade total de clusteres foi de 22, os demais foram omitidos por serem em clusteres com pouco individuos, geralmente
+				  referente a ruídos.  
+			</p>
 
 			<p class="image_p">
 				<a href="images/image_0.png" target="_blank"><img src="images/image_0.png" width="400" /></a>
@@ -89,24 +134,68 @@
 				<a href="images/image_5.png" target="_blank"><img src="images/image_5.png" width="400" /></a>
 				<br />
 
-				Imagens binárias com clusteres resultantes da aplicação do Qt. Os pixels com cor branca representa qu
+				Imagens binárias com alguns clusteres resultantes da aplicação do QT.
+			</p>
+			<p>
+				A imagem abaixo a seguir é uma representação do resultado da clusterização em cores. Os pixels que
+				possuem o mesmo pixel fazem parte do mesmo grupo.
 			</p>
 			<p class="image_p">
 				<a href="images/clusters_final.png" target="_blank"><img src="images/clusters_final.png" target="_blank" /></a>
+				<br />
+				Resultado da clusterização em cores. Cada cor é um grupo diferente.
 			</p>
+			
+			<p>
+				A principal contribuição dessa abordagem é apresentar uma forma de identificar os horizontes principalmente
+				após uma falha sísmica. Embora algoritmos de binarização facilmente segmentam os horizontes de forma 
+				relativamente eficiente, têm seus resultados comprometidos na presença da falha sísmica que provoca 
+				descontinuidade no horizonte. Dessa forma, não é tão trivial identificar precisamente de maneira
+				automática a extensão do horizonte por todas as dimensões da imagem. 
+			</p>
+			<p>
+				Nas imagens abaixo mostram o detalhe ampliado do resultado da metodologia em uma falha sísmica.
+				 Podemos notar que os grupos referentes a um horizonte mantiveram-se bem identificados mesmo apoós a ruptura
+				 feita pela falha. Além de evidenciar mais a presença da falha naquela direção, pois a descontinuidade de pixels
+				 com o mesmo comportamento ao longo do horizonte (valores de intensidades) pode caracterizar uma falha, 
+				 refletindo no resultado do agrupamento deste pixels.
+			</p>
+			
 
 			<p class="image_p">
 				<img src="images/cluster_detail.png" href="images/cluster_detail.png" target="_blank" />
 				<img src="images/original_detail.png" href="images/original_detail.png" target="_blank" />
+				<br />
+				Detalhe do resultado do QT ampliado em uma falha sísmica.
 			</p>
+			
+			<h2>Conclusão</h2>
+			
+			<p>
+				Esta página apresentou conceitos básicos de imagens sísmicas e a aplicação do algoritmo de clusterização QT.
+				Os resultados obtidos pela metodologia são apenas preliminares, tendo como objetivo ser o início de uma abordagem
+				com base a clusterização não supervisionada. Cabe a trabalhos futuros melhorar os resultados e realizar
+				propriamente a segmentação de horizontes e falhas automaticamente.  
+			</p>
+			
+			<h2>Código Fonte</h2>
+			
+			<a href="resources/src.zip" target="_blank"> src.zip</a>
 
 			<h2>Referências</h2>
+			
+			<p>
+				SILVA, P. M. C. Visualização Volumétrica de Horizontes em Dados Sísmicos 3D. Tese de Doutorado em Informática. Puc-Rio 2004. 
+			</p>
+			
 			<p>
 				JIANG, D.; TANG, C.; ZHANG, A. Cluster analysis for gene expression data: A  survey. IEEE Transactions on Knowledge and Data Engineering, 16 (11) 1370-1386, New York, 2006.
 			</p>
 			<p>
 				XU R.; WUNSCH, D. Survey of clustering algorithms. IEEE  Transactions on Neural Networks, vol. 16, n. 3, p. 645 - 678,  2005.
 			</p>
+			
+			
 
 		</div>
 	</body>
