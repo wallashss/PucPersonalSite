@@ -21,74 +21,171 @@
 			<h1>Ray Tracing</h1>
 			
 			<p>
-				A implementação do Ray Tracing deste trabalho tem como objetivo ser o mais o mais simples possível. Porém ainda assim
-				com as principais features da técnica. 
+				A implementação do Ray Tracing deste trabalho tem como objetivo ser o mais o mais simples possível. Porém possui
+				com as principais características da técnica. 
 			</p>
 			
 			<h2>Introdução</h2>
 			
 			<p>
-				O Ray Tracing é uma técnica de renderização com o objetivo de simular o trajeto da luz na iluminação de objetos,
-				 de um cena. Na natureza, a luz emitida de uma fonte é refletida, absorvida por todos os objetos de um ambiente. 
-				 A imagem que se forma na visão humana depende de como os materiais dos objetos se comportam ao receber fótons 
+				O Ray Tracing é uma técnica de renderização com o objetivo de simular o trajeto da luz na iluminação de objetos
+				 de um cena. 
+				 A imagem que se forma na visão humana depende de como os materiais dos objetos se comportam ao receber fótons, 
 				 podendo absorver toda a luz (corpos negro), refletir (espelho), refratar (objetos transparentes) ou refletir 
 				 determinadas frequências que formam as cores visíveis para o olho humano. Uma abordagem direta para produzir 
 				 um ray tracing é através da simulação de disparos de raios de uma fonte de luz
 			 por toda a cena e capturar os raios refletidos. 
 			</p>
+            
+            <p>
+            
+            </p>
 			
 			<h2>Ray Casting</h2>
 			
 			<p>
-			O primeiro passo da técnica é detectar os objetos a serem renderizados na cena. Para isso deve ser definido um frustum
-			de visualização do observador que um volume que define o limite da visão. Esse frustum també é importante para definir
+			O primeiro passo da técnica é detectar os objetos a serem renderizados na cena através do ray casting. Para isso deve ser definido um frustum
+			de visualização do observador que é o volume que define o limite da visão. Esse frustum também é importante para definir
 			o plano de projeção onde serão projetados os objetos da cena. O plano de projeção irá definir a imagem 2D da cena a ser
-			renderizado que depois deve ser transformada em uma imagem de um monitor onde será exibido chamado viewport. 
+			renderizada. 
+            
+			</p>
+            
+            <p class="image_p">
+				<img src="images/frustum.png" />
+                <br >
+                Esquema de um frustum.
 			</p>
 			
 			<p>
-				O plano de projeção deve ser dividido em um espécie de grade, onde cada célula dessa grade é um ponto que conterá 
-				uma cor da imagem da cena. Para definir da cor desta célula é necessário descobrir que ponto do objeto está sendo 
+				O plano de projeção deve ser dividido em uma espécie de grade, onde cada célula dessa grade é um ponto que conterá 
+				uma cor da imagem da cena. Para definir cor desta célula é necessário descobrir que ponto do objeto está sendo 
 				projetado. O ray casting é a técnica utilizada para descobrir este ponto. O procedimento consiste em "disparar" um raio
 				da origem do observador passando pelo centro de uma célula do plano de projeção até um certo limite (o limite do
-				frustum por exemplo). Para cada raio, itera-se por todos os objetos até que encontre um objeto ou nada, e em seguida
-				guarda-se este ponto para as próximas etapas. Em caso
-				de mais de um objeto toma-se em conta o mais próximo. Objetos transparentes ou reflexivo serão descritos mais adiante.
+				frustum por exemplo). Para cada raio, itera-se por todos os objetos até que encontre um objeto ou nada e em seguida
+				guarda-se este ponto para as próximas etapas. Em caso de interseção com
+				mais de um objeto, toma-se em conta o mais próximo. Objetos transparentes ou reflexivo serão descritos mais adiante.
 			</p>
 			
+            <p class="image_p">
+				<img src="images/grid.png" width="300px" />
+                <br />
+                Grid do plano de projeção.
+			</p>
+            
+            <p>
+             Na etapa de ray casting deve-se iterar por todos os objetos da cena e definir seus pontos que serão projetados. Cada objeto deve ter uma função que defina a interseção para um dado raio. No caso de planos e esferas podem ser calculados por suas respectivas funções paramétricas. Em geometrias complexas geralmente secciona-se o objeto em um conjunto de polígonos simples que seja mais fácil computar o ray casting, na maioria dos casos em triângulos. A imagem a seguir mostra o resultado de um raycasting aplicado em uma cena com várias esferas. Cada pixel pertecente a um objeto foi atribuido com cor branca para indicar a presença na projeção.
+            </p>
+            
 			<p class="image_p">
 				<img src="images/01_raycasting.png" width="300px" />
+                <br />
+                Resultado do ray casting.
 			</p>
+            
+         
 			
 			<h2>Modelo de Phong</h2>
 			
+            <p>
+            Para cálculo de iluminação em um ponto, optou-se em utilizar o modelo de Phong. O modelo de Phong é um das técnicas mais utilizada para cálculo de Iluminação
+            em sistemas de computação gráfica. Seu cálculo é simples e rápido de computar até mesmo por pixel e ainda assim obtém resultados bastante satisfatório.    
+            </p>
+            
+            <p>
+            A iluminação por phong é dividida em 3 componentes principais: ambiente, difusa e especular. A iluminação ambiente é uma constante que adiciona uma quantidade mínima de iluminação em todos os objetos. Essa componente é uma simplificação dos raios refletidos de toda cena, no qual ilumina minimamente um ponto que não teve incidência de raios diretamente de uma fonte de luz. A iluminação difusa depende dos raios de incidência da fonte de luz e a normal no ponto, onde objetos mais próximos da fonte de luz receberão maior quantidade de iluminação que os mais distantes. A iluminação especular depende do raio incidente refletido do objeto (necessário a normal) e da visão do observador na qual pontos refletidos que vão direto ao plano possui maior saturação em sua cor.
+            </p>
+            
+            <p>
+            A seguir um pseudo algoritmo para implementação do modelo de phong de um pixel em um ponto. As funções de algebra vetorial podem ser implementadas ou serem utilizadas de uma biblioteca de algebra (<a href="http://glm.g-truc.net/0.9.5/index.html" target="_blank">GLM</a>). Lembrando que essas funções são padrões do GLSL.
+            </p>
+            <p class="code_p">
+                <pre><code>
+// Parâmetros
+// ka - Constante ambiente
+// kd - Constante difusa
+// ks - Constante especular
+// normal - Normal no ponto
+// pos - Posição do ponto
+// shininess - Fator de brilho da especular 
+
+// Saída
+// cor - cor final do ponto
+
+ambiente = ka;
+difusa =0;
+especular =0;
+
+dirObservador = posObservador - pos; 
+
+para cada luz em todas as luzes
+        
+    dirLuz = normaliza(luz.posicao-pos);
+    difusa += kd * max( 0, prodEscalar(normal , dirLuz)); // Produto escalar
+     
+    refletido = reflexao(-dirLuz, normal);
+    especular += max(0, prodEscalar(refletido, dirObservador));
+    especular = ks * pow(especular, shininess);
+    
+fim para
+
+cor = ambiente + difusa + especular;
+
+
+                </pre></code>
+            </P>
+            
+            
+            
 			<p class="image_p">
 				<img src="images/02_ambient.png" width="300px" />
 				<img src="images/03_diffuse.png" width="300px"/>
 				<img src="images/04_specular.png" width="300px"/>
+                <br />
+                Imagens para ambiente, ambiente + difusa e ambiente + difusa + especular respectivamente.
 			</p>
 			
 			
 			
 			<h2>Sombra</h2>
 			
+            <p>
+            A sombra é o resultado da oclusão do objeto por outro impedindo a incidência de luz. Assim como na natureza, quando a luz não atinge uma superfície de um objeto(se não for emissor de luz), este estará mais escuro que os demais. A inclusão dessa característica no ray tracing gera mais realismo a cena e também dar uma idéia melhor de localização dos objetos na cena. As imagens a seguir mostra a mesma cena adicionado de um plano xadrez sem sombras e posteriormente com sombra. 
+            </p>
+            
+            
 			<p class="image_p">
 				<img src="images/05_chess.png" width="450px" />
 				<img src="images/06_shadow.png" width="450px" />
+                
+                <br />
+                Comparação da renderização de uma cena com e sem sombra.
 			</p>
+            
+            <p>
+            No processo explicado anteriormente, para incluir sombra deve-se testar para cada ponto luz se 
+            </p>
 			
 			<h2> Anti Aliasing</h2>
 			
-			Um efeito comum em uma renderização é presença de aliasing, ou também chamado de cerrilhado. 
-			O aliasing é resultado de um mudança de frequência abrupta, que é mais presente em cenas artificiais. Em imagens
-			mais naturais (fotografia) essa transição é geralmente mais suave. A técnica mais comum de anti-aliasing é o multisample,
+			Um efeito comum em uma renderização é presença de aliasing ou  cerrilhado. 
+			O aliasing é resultado de um mudança de frequência abrupta que é mais presente em cenas artificiais. Em imagens
+			mais naturais (fotografia) essa transição é geralmente mais suave. A técnica mais comum de anti-aliasing é o multisample (super-amostragem),
 			que consiste em gerar uma amostra maior resolução do plano de projeção que a resolução final da imagem resultante. A forma
 			mais comum é gerar 4 pontos adicionais para uma célula além do ponto central e então calcular a média do valor da cor deste
 			5 pontos e atribuir ao ponto central.  
 			
 			<p class="image_p">
 				<img src="images/06_shadow.png"  />
+                <br >
+                
+                Imagem com Aliasing.
+                </p>
+                <p class="image_p">
 				<img src="images/07_antialiasing.png" />
+                
+                <br >
+                Imagem com anti-Aliasing por multisample.
 			</p>
 			
 			
@@ -109,9 +206,19 @@
 			
 			<h2>Código Fonte</h2>
 			
-			<a href="resources/src.zip" target="_blank"> src.zip</a>
+            <p>
+            Abaixo o link para o código fonte para o exemplo apresentado. O código possui alguns artifícios a mais omitidos na explicação para mantê-la mais didática possível. Dentre os adicionais, destaca-se o paralelismo da execução para acelerar a renderização e aplicação de atenuação na iluminação, que consiste em diminuir a iluminação dos pontos mais distantes das fontes de luz, para melhor efeito visual.
+            </p>
+            
+			<p><a href="resources/src.zip" target="_blank"> src.zip</a></p>
+            
+            <h2>Referências</h2>
+            
+            <p>GLM - OpenGL Mathematics. <a href="http://glm.g-truc.net/0.9.5/index.html" target="_blank">http://glm.g-truc.net/0.9.5/index.html</a></p>
+            
+            <p>Phong, Bui Tuong. "Illumination for computer generated pictures." Communications of the ACM 18.6 (1975): 311-317.</p>
 			
-			
+			<p>Greve, Bram de.  Reflections and Refractions in Ray Tracing. Disponível em <a href="http://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf"> http://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf</a>. Introduction to Computer Graphics and Imaging. Stanford University. 2006.</p>
 
 		</div>
 	</body>
