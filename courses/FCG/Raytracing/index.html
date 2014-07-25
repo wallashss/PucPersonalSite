@@ -265,16 +265,83 @@ fim função
 			
 			<h2>Reflexão e Refração</h2>
 			
+		<p>
+			A reflexão e a refração dos objetos no Ray tracing são as características mais marcantes da técnica. Até então, todo processo descrito tem resultados equivalentes produzidos pelo famoso OpenGL. Como foi comentado anteriormente, o Ray tracing simula o comportamento da luz, então a cor de um ponto de um material que reflete será igual a cor do ponto de um raio refletido de outro ponto. 
+		</p>
+
+			<p>Para ilustrar melhor essa característica da técnica, a cena de exemplo foi modificada para ter paredes e tetos.
+			</p>
 			<p class="image_p">
 				<img src="images/08_room.png"  />
+				<br />
+				Cena de exemplo com paredes e tetos.
 			</p>
+
+
+		<p>
+			Na prática a reflexão é implementada realizando uma recursão na função de traçar raios. Caso um material seja reflexivo, calcula-se o raio refletido utilizando a normal e o raio 
+			incidente e então é invocado a mesma função para obter a cor deste ponto. É claro que pode ocorrer do raio refletido ter origem de outro raio refletido de um material reflexivo. Para que o programa não entre em loop infinito deve-se definir um critério de parada, normalmente pode ser um número que limita a quantidade de vezes que irá fazer a recursão. O pseudo algoritmo abaixo mostrar como implementar esse comportamento de reflexão.
+		</p>
+
+			<p>
+			<pre> <code>
+
+// Retorna a cor 
+função traçarRaio(vetor raio)
+
+	para cada objeto em todos objetos faça
+		se intersecao(raio, objeto) então
+			se objeto é reflexivo
+				//função que retorno o ponto de interseção de um raio em um objeto
+				vetor ponto = getInterseção(raio, objeto); 
+
+				// Retorna normal do ponto em dado objeto
+				vetor normal = getNormal(ponto, objeto);
+
+				vetor refletido = reflexao(raio, normal);
+				retorna traçarRaio(refletido);
+
+			senão
+				// Realiza o modelo a iluminação normalmente
+				vetor cor;
+				(...)
+				retorna cor;
+
+			fim se
+
+		fim se
+
+	fim para
+fim função
+			</code>
+			</pre>
+		</p>
+
+		<p>
+			Após finalizar a recursão dos raios refletidos, a cor do objeto é retornado ao material o refletido. Com essa cor pode ser feito também uma mesclagem com a cor do objeto. Para o trabalho desta página foi realizado uma média entre a cor do objeto e a cor refletido. O resultado é suficientemente convincente. Existem outras formas de fazer essa mistura de cor, vai depender do efeito desejado que apareça no material. O resultado é mostrado na imagem abaixo.
+
+		</p>
 			
 			<p class="image_p">
 				<img src="images/09_reflexive.png"  />
+				<br />
+				Reflexão nos objetos da cena.
 			</p>
 			
+
 			<p class="image_p">
-				<img src="images/10_refraction.png"  />
+				<img src="images/10_1_wrong_refraction.png"  />
+				<br />
+				Refração errada por não tratar os ângulos críticos da refração.
+			</p>
+
+
+
+
+			<p class="image_p">
+				<img src="images/10_2_refraction.png"  />
+				<br />
+				Refração e a cena final renderizada utilizando Ray Tracing.
 			</p>
 			
 			<h2>Conclusão</h2>
