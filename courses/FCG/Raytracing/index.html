@@ -32,14 +32,23 @@
 				 de um cena. 
 				 A imagem que se forma na visão humana depende de como os materiais dos objetos se comportam ao receber fótons, 
 				 podendo absorver toda a luz (corpos negro), refletir (espelho), refratar (objetos transparentes) ou refletir 
-				 determinadas frequências que formam as cores visíveis para o olho humano. Uma abordagem direta para produzir 
-				 um ray tracing é através da simulação de disparos de raios de uma fonte de luz
-			 por toda a cena e capturar os raios refletidos. 
+				 determinadas frequências que formam as cores visíveis para o olho humano. Uma abordagem direta para reproduzir 
+				 um ray tracing é através da simulação de disparos de raios de uma ou mais fontes de luz por toda a cena e 
+				 capturar os raios refletidos para calcular suas respectivas cores dos objetos por equações da óptica da física.
+			 
+			 
 			</p>
-            
-            <p>
-            
-            </p>
+			
+			<p>
+				Porém a abordagem direta pode não ser computacionalmente a melhor forma de fazer na prática. Disparar raios
+				de forma aleatória pode não obter um resultado satisfatório por não capturar os raios relevantes para renderização, 
+				além de ser muito ineficiente. Uma das formas de contornar esse problema é
+				calculando o caminho inverso do raio que chega a visão do observador (backward ray tracing). Para iluminação também pode
+				ser usado modelos aproximados que chegam a resultados satisfatórios como o modelo de Phong.  
+				Nas seções seguintes serão descritos essas técnicas para produzir um Ray Tracing relativamente eficiente e com
+				uma boa qualidade de imagem. 
+			</p>
+
 			
 			<h2>Ray Casting</h2>
 			
@@ -60,7 +69,7 @@
 			<p>
 				O plano de projeção deve ser dividido em uma espécie de grade, onde cada célula dessa grade é um ponto que conterá 
 				uma cor da imagem da cena. Para definir cor desta célula é necessário descobrir que ponto do objeto está sendo 
-				projetado. O ray casting é a técnica utilizada para descobrir este ponto. O procedimento consiste em "disparar" um raio
+				projetado. O procedimento consiste em "disparar" um raio
 				da origem do observador passando pelo centro de uma célula do plano de projeção até um certo limite (o limite do
 				frustum por exemplo). Para cada raio, itera-se por todos os objetos até que encontre um objeto ou nada e em seguida
 				guarda-se este ponto para as próximas etapas. Em caso de interseção com
@@ -93,49 +102,71 @@
             </p>
             
             <p>
-            A iluminação por phong é dividida em 3 componentes principais: ambiente, difusa e especular. A iluminação ambiente é uma constante que adiciona uma quantidade mínima de iluminação em todos os objetos. Essa componente é uma simplificação dos raios refletidos de toda cena, no qual ilumina minimamente um ponto que não teve incidência de raios diretamente de uma fonte de luz. A iluminação difusa depende dos raios de incidência da fonte de luz e a normal no ponto, onde objetos mais próximos da fonte de luz receberão maior quantidade de iluminação que os mais distantes. A iluminação especular depende do raio incidente refletido do objeto (necessário a normal) e da visão do observador na qual pontos refletidos que vão direto ao plano possui maior saturação em sua cor.
+            A iluminação por phong é dividida em 3 componentes principais: ambiente, difusa e especular. A iluminação ambiente 
+            é uma constante que adiciona uma quantidade mínima de iluminação em todos os objetos. Essa componente é uma 
+            simplificação dos raios refletidos de toda cena, no qual ilumina minimamente um ponto que não teve incidência de 
+            raios diretamente de uma fonte de luz. A iluminação difusa depende dos raios de incidência da fonte de luz e a normal
+             no ponto, onde objetos mais próximos da fonte de luz receberão maior quantidade de iluminação que os mais distantes.
+              A iluminação especular depende do raio incidente refletido do objeto (necessário a normal) e da visão do observador, 
+              na qual pontos refletidos que vão direto ao plano possui maior saturação em sua cor.
             </p>
             
             <p>
-            A seguir um pseudo algoritmo para implementação do modelo de phong de um pixel em um ponto. As funções de algebra vetorial podem ser implementadas ou serem utilizadas de uma biblioteca de algebra (<a href="http://glm.g-truc.net/0.9.5/index.html" target="_blank">GLM</a>). Lembrando que essas funções são padrões do GLSL.
+            A seguir, um pseudo algoritmo para implementação do modelo de phong de um pixel em um ponto.
+             As funções de algebra vetorial podem ser implementadas ou serem utilizadas de uma biblioteca de 
+             algebra (<a href="http://glm.g-truc.net/0.9.5/index.html" target="_blank">GLM</a>). Lembrando que essas 
+             funções estão presentes por padrão do GLSL (OpenGL Shading Language).
             </p>
             <p class="code_p">
                 <pre><code>
-// Parâmetros
-// ka - Constante ambiente
-// kd - Constante difusa
-// ks - Constante especular
-// normal - Normal no ponto
-// pos - Posição do ponto
-// shininess - Fator de brilho da especular 
+// Tipos
+// real - tipo genérico de valor unitário
+// vetor - tipo genérico de tupla n-dimensional 
+
+// Parâmetros locais
+
+// vetor normal - Normal no ponto
+// vetor pos - Posição do ponto
+// vetor corPonto - Cor do ponto no objeto
+// vetor espPonto - Fator de cor especular
+
+// Parâmetros globais
+
+// real ka - Constante ambiente
+// real kd - Constante difusa
+// real ks - Constante especular  
+// real brilhoFat - Fator de brilho da especular 
 
 // Saída
-// cor - cor final do ponto
+// vetor cor - cor final do ponto
+função calculaCor(vetor pos, vetor normal, vetor corPonto, vetor espPonto)
 
-ambiente = ka;
-difusa =0;
-especular =0;
-
-dirObservador = posObservador - pos; 
-
-para cada luz em todas as luzes
-        
-    dirLuz = normaliza(luz.posicao-pos);
-    difusa += kd * max( 0, prodEscalar(normal , dirLuz)); // Produto escalar
-     
-    refletido = reflexao(-dirLuz, normal);
-    especular += max(0, prodEscalar(refletido, dirObservador));
-    especular = ks * pow(especular, shininess);
-    
-fim para
-
-cor = ambiente + difusa + especular;
-
-
-                </pre></code>
-            </P>
+	
+	vetor ambiente = vetor(1); // Inicialização de vetor com valor 1 em todos componentes  
+	vetor difusa ;
+	vetor especular ;
+	
+	vetor dirObservador = posObservador - pos; 
+	
+	para cada vetor luzPos em todas as luzes
+	        
+	    vetor dirLuz = normaliza(luzPos-pos);
+	    
+	    difusa += corPonto * kd * max( 0, prodEscalar(normal , dirLuz)); // Produto escalar
+	     
+	    refletido = reflexao(-dirLuz, normal);
+	    real especularCor += max(0, prodEscalar(refletido, dirObservador));
+	    especular = espPonto * ks * pow(especular, brilhoFat);
+	   
+	fim para
+	
+	cor = ka * ambiente + kd * difusa + ks * especular;
+	
+	retorna cor;
+fim função
+                </code></pre>
             
-            
+            </p>
             
 			<p class="image_p">
 				<img src="images/02_ambient.png" width="300px" />
@@ -150,7 +181,11 @@ cor = ambiente + difusa + especular;
 			<h2>Sombra</h2>
 			
             <p>
-            A sombra é o resultado da oclusão do objeto por outro impedindo a incidência de luz. Assim como na natureza, quando a luz não atinge uma superfície de um objeto(se não for emissor de luz), este estará mais escuro que os demais. A inclusão dessa característica no ray tracing gera mais realismo a cena e também dar uma idéia melhor de localização dos objetos na cena. As imagens a seguir mostra a mesma cena adicionado de um plano xadrez sem sombras e posteriormente com sombra. 
+            A sombra é o resultado da oclusão do objeto por outro impedindo a incidência de luz. Assim como na natureza, 
+            quando a luz não atinge uma superfície de um objeto (se não for emissor de luz), este estará mais escuro que os 
+            demais. A inclusão dessa característica no ray tracing gera mais realismo a cena e também dar uma idéia melhor de
+             localização dos objetos na cena. As imagens a seguir mostram a mesma cena adicionado de um plano xadrez sem sombras 
+             e posteriormente com sombra. 
             </p>
             
             
@@ -163,7 +198,41 @@ cor = ambiente + difusa + especular;
 			</p>
             
             <p>
-            No processo explicado anteriormente, para incluir sombra deve-se testar para cada ponto luz se 
+            No processo explicado anteriormente da iluminação de objetos, para incluir sombra deve-se testar para cada fonte luz que
+            está iluminando se este está ocluso, se estiver, naquele ponto não será adicionado contribuição de iluminação para
+            uma dada fonte de luz. Isso pode ser feito removendo as componentes difusas e especular. 
+            </p>
+            
+            <p>
+            <pre><code>
+
+// Calcula a interseção de um raio vindo da origem passando pela direção em um objeto.             	
+// funcao interseccao(vetor origem, vetor direcao, objeto objeto)
+
+
+função calculaCor(vetor pos, vetor normal, vetor corPonto, vetor espPonto) 
+	
+	(...)
+	para cada vetor luzPos em todas as luzes
+	    (...)
+	    para cada objeto em todos os objetos
+	    	se intersecao(pontoPos, luzPos, objeto)
+	    		// Não adiciona iluminação no ponto
+	    	senão
+	    		// Continua calculando a iluminação
+	    		(...)
+	    	
+	    	fim se
+	    
+	    fim para
+	   
+	fim para
+	
+	cor = ka * ambiente + kd * difusa + ks * especular;
+	(...)
+	retorna cor;
+fim função
+            </code></pre>
             </p>
 			
 			<h2> Anti Aliasing</h2>
@@ -171,14 +240,19 @@ cor = ambiente + difusa + especular;
 			Um efeito comum em uma renderização é presença de aliasing ou  cerrilhado. 
 			O aliasing é resultado de um mudança de frequência abrupta que é mais presente em cenas artificiais. Em imagens
 			mais naturais (fotografia) essa transição é geralmente mais suave. A técnica mais comum de anti-aliasing é o multisample (super-amostragem),
-			que consiste em gerar uma amostra maior resolução do plano de projeção que a resolução final da imagem resultante. A forma
+			que consiste em gerar uma amostra maior de resolução do plano de projeção que a resolução final da imagem resultante. A forma
 			mais comum é gerar 4 pontos adicionais para uma célula além do ponto central e então calcular a média do valor da cor deste
 			5 pontos e atribuir ao ponto central.  
 			
 			<p class="image_p">
+				<img src="images/multisample.png"  />
+                <br />
+                Esquema dos pontos na grade para realizar o multisample.
+           </p>
+			
+			<p class="image_p">
 				<img src="images/06_shadow.png"  />
                 <br >
-                
                 Imagem com Aliasing.
                 </p>
                 <p class="image_p">
@@ -203,6 +277,14 @@ cor = ambiente + difusa + especular;
 				<img src="images/10_refraction.png"  />
 			</p>
 			
+			<h2>Conclusão</h2>
+			
+			O Ray tracing é uma técnica que gera imagens realista de forma simples e satisfatória. Porém, atualmente ainda é proibitivo
+			sua utilização em tempo real, pois como foi visto, possui cálculos custosos que limitam o algoritmo nesse aspecto.
+			Possui mais aplicações em renderização de imagens estáticas e vídeos. Para atingir o tempo real, técnicas de 
+			otimização devem ser aplicadas e/ou desenvolvidas para alcançar este objetivo em determinados casos de uso.
+			  
+			
 			
 			<h2>Código Fonte</h2>
 			
@@ -210,7 +292,7 @@ cor = ambiente + difusa + especular;
             Abaixo o link para o código fonte para o exemplo apresentado. O código possui alguns artifícios a mais omitidos na explicação para mantê-la mais didática possível. Dentre os adicionais, destaca-se o paralelismo da execução para acelerar a renderização e aplicação de atenuação na iluminação, que consiste em diminuir a iluminação dos pontos mais distantes das fontes de luz, para melhor efeito visual.
             </p>
             
-			<p><a href="resources/src.zip" target="_blank"> src.zip</a></p>
+			<p><a href="resources/src.zip" target="_blank">src.zip</a></p>
             
             <h2>Referências</h2>
             
